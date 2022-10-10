@@ -26,7 +26,7 @@ int main() {
 	sf::Clock clock2;
 	sf::Clock clock3;
 
-	int idx = 0;
+	/*int idx = 0;
 	std::vector<std::string> defaultFilename{ "default1.png", "default2.png", "default3.png", "default4.png" };
 	sf::Texture tdefault;
 	tdefault.loadFromFile(defaultFilename[idx]);
@@ -42,10 +42,11 @@ int main() {
 	spFly.setTexture(fly);
 	spFly.setScale(1.5f, 2.25f);
 
-	std::string mode = "default";
+	
 	sf::Sprite tmpSprite;
-	tmpSprite = spDefault;
+	tmpSprite = spDefault;*/
 
+	std::string mode = "default";
 	int counterStepD = 0;
 	int counterStepA = 0;
 	int counterStepW = 0;
@@ -204,7 +205,7 @@ int main() {
 			}
 			clock2.restart();
 		}
-		playerPos = spDefault.getPosition();
+		//playerPos = spDefault.getPosition();
 
 		window.clear(sf::Color(150, 150, 150, 255));
 
