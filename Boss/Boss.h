@@ -35,7 +35,7 @@ private:
 
 	short mode = MOVE;
 	short side = LEFT;
-	const float defaultSpeed = 150;
+	const float defaultSpeed = 200;
 	const float minSpeed = 100;
 	float speed = defaultSpeed;
 	sf::Vector2f move{ -speed, 0.0f };
@@ -44,7 +44,7 @@ private:
 	float curMoveFrame = moveFrameTime;
 	float cntMoveFrame = 0.0f;
 
-	const float atkFrameTime = 0.15f;
+	const float atkFrameTime = 0.08f;
 	float curAtkFrameTime = atkFrameTime;
 	float cntAtkFrame = 0.0f;
 
@@ -71,6 +71,13 @@ private:
 
 	bool isExplose = false;
 
+
+	short cntHitPlayer = 0;
+
+	short energyRegen = 0;
+	short deltaHealthPlayer = 0;
+
+
 private:
 	void setModeSideTopMove(const short mode, const short side, const short top, const sf::Vector2f move);
 	void setTextureRect();
@@ -85,14 +92,26 @@ public:
 	const std::vector<short> maxLeft{3,3,10,10,10,5,5};
 	short top = 1;
 	short left = 0;
+
+	bool isBossDied = false;
+	bool isPlayerDied = false;
+
+	// health boss
+	short healthBoss = 1000;
+	//
 public:
 	Boss();
 	void onEvent(const sf::Event& event);
 	void onUpdate();
 	void draw(sf::RenderWindow& window);
-
+	void setHealth(const std::string condition, const short curCombo);
+	void collision(const std::string condition, const bool isCollided, const short curCombo);
 	void requestPlayerSprite(const sf::Sprite& playerSP);
 	void requestPlayerSide(const short playerSide);
 	void requestPlayerScale(const sf::Vector2f& playerScale);
+	short updateDeltaHealthPlayer();
+	short updateEnergyPlayer();
+	void requestIsPlayerDied(const bool isPlayerDied);
+	
 };
 
