@@ -54,6 +54,14 @@ void Boss::setFrame(const short mode) {
 		++left;
 		if (left >= maxLeft[top]) {
 			left = 0;
+			if (this->mode == ATK) {
+				setModeSideTopMove(EXP, side, EXPLOSE, {0.0f, 0.0f});
+				cntIsAttack = 0;
+			}
+			else if (this->mode == EXP) {
+				if (side == RIGHT) setModeSideTopMove(MOVE, side, MOVE_R, {speed, move.y});
+				else if (side == LEFT) setModeSideTopMove(MOVE, side, MOVE_L, { -speed, move.y });
+			}
 		}
 	}
 	
@@ -118,6 +126,13 @@ void Boss::chasing() {
 	}*/
 
 	if (move.x == 0 && move.y == 0) {
+		++cntIsAttack;
+		if (cntIsAttack) {
+			isAttack = true;
+			if (side == RIGHT) setModeSideTopMove(ATK, side, ATK_R, { 0.0f, 0.0f });
+			else if (side == LEFT) setModeSideTopMove(ATK, side, ATK_L, { 0.0f, 0.0f });
+		}
+		
 		text.setString("READY TO ATTACK");
 	}
 	else text.setString("Chasing...");
@@ -128,7 +143,8 @@ void Boss::onEvent(const sf::Event& event) {
 }
 
 void Boss::onUpdate() {
-	chasing();
+	if(mode != EXP && mode != ATK) chasing();
+
 	if (mode == MOVE) {
 		
 		cntMoveFrame += deltaTime.asSeconds();
@@ -144,11 +160,19 @@ void Boss::onUpdate() {
 			cntAtkFrame -= curAtkFrameTime;
 		}
 	}
-	else if (mode == EXPLOSE) {
-
+	else if (mode == EXP) {
+		cntExpFrame += deltaTime.asSeconds();
+		if (cntExpFrame >= curExpFrameTime) {
+			setFrame(EXP);
+			cntExpFrame -= curExpFrameTime;
+		}
 	}
 	else if (mode == DEAD) {
-
+		cntDead += deltaTime.asSeconds();
+		if (cntDead >= deadFrameTime) {
+			setFrame(DEAD);
+			cntDead -= deadFrameTime;
+		}
 	}
 	setTextureRect();
 	bossMove();
