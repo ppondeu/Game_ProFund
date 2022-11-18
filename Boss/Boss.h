@@ -9,7 +9,7 @@ class Boss
 private:
 	const short MOVE = 0;
 	const short ATK = 1;
-	const short EXPLOSE = 2;
+	const short EXP = 2;
 	const short DEAD = 3;
 
 	const short RIGHT = 0;
@@ -19,7 +19,7 @@ private:
 	const short MOVE_L = 1;
 	const short ATK_R = 2;
 	const short ATK_L = 3;
-	const short EXP = 4;
+	const short EXPLOSE = 4;
 	const short DEAD_R = 5;
 	const short DEAD_L = 6;
 
@@ -44,11 +44,17 @@ private:
 	float curMoveFrame = moveFrameTime;
 	float cntMoveFrame = 0.0f;
 
-	const float atkFrameTime = 0.8f;
+	const float atkFrameTime = 0.15f;
 	float curAtkFrameTime = atkFrameTime;
 	float cntAtkFrame = 0.0f;
 
+	const float expFrameTime = 0.1f;
+	float curExpFrameTime = expFrameTime;
+	float cntExpFrame = 0.0f;
 
+
+	const float deadFrameTime = 0.2f;
+	float cntDead = 0.0f;
 	// crop boss
 	sf::Font font;
 	sf::Text text;
@@ -59,6 +65,11 @@ private:
 	short playerSide;
 	sf::Vector2f playerScale;
 	//
+
+	bool isAttack = false;
+	short cntIsAttack = 0;
+
+	bool isExplose = false;
 
 private:
 	void setModeSideTopMove(const short mode, const short side, const short top, const sf::Vector2f move);
