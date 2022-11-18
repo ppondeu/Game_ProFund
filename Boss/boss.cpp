@@ -55,8 +55,9 @@ void Boss::setFrame(const short mode) {
 		if (left >= maxLeft[top]) {
 			left = 0;
 			if (this->mode == ATK) {
-				setModeSideTopMove(EXP, side, EXPLOSE, {0.0f, 0.0f});
+				setModeSideTopMove(EXP, side, EXPLOSE, { 0.0f, 0.0f });
 				cntIsAttack = 0;
+				cntHitPlayer = 0;
 			}
 			else if (this->mode == EXP) {
 				if (side == RIGHT) setModeSideTopMove(MOVE, side, MOVE_R, {speed, move.y});
@@ -199,6 +200,58 @@ void Boss::draw(sf::RenderWindow& window) {
 	window.draw(text);
 }
 
+void Boss::setHealth(const std::string condition, const short curCombo) {
+	if (condition == "PLAYER") {
+		if (curCombo == 2 || curCombo == 3) deltaHealthPlayer -= 79;
+		else if (curCombo == 4) deltaHealthPlayer -= 1;
+	}
+	if (condition == "ENEMY") {
+		if (curCombo == 0 || curCombo == 1) {
+			healthBoss -= 20;
+			energyRegen += 3;
+		}
+		else if (curCombo == 2 || curCombo == 3) {
+			healthBoss -= 25;
+			energyRegen += 5;
+		}
+		else if (curCombo == 4 || curCombo == 5) {
+			healthBoss -= 45;
+		}
+
+		if (healthBoss <= 0) {
+			healthBoss = 0;
+			isBossDied = true;
+			if (side == RIGHT) setModeSideTopMove(DEAD, RIGHT, DEAD_R, { 0.0f, 0.0f });
+			else if (side == LEFT) setModeSideTopMove(DEAD, LEFT, DEAD_L, { 0.0f, 0.0f });
+			energyRegen += 10;
+		}
+		else isBossDied = false;
+	}
+}
+
+void Boss::collision(const std::string condition, const bool isCollided, const short curCombo) {
+	if (condition == "BOSS HIT PLAYER") {
+		if (isCollided) {
+			++cntHitPlayer;
+			if (curCombo == 2 || curCombo == 3) {
+				if (cntHitPlayer == 1) {
+					setHealth("PLAYER", curCombo);
+				}
+			}
+			else if (curCombo == 4) setHealth("PLAYER", curCombo);
+		}
+		else {
+			cntHitPlayer = 0;
+		}
+	}
+	else if (condition == "BOSS GOT BULLET") {
+		if (isCollided) {
+			setHealth("BOSS", curCombo);
+		}
+	}
+
+}
+
 void Boss::requestPlayerSprite(const sf::Sprite& playerSP) {
 	this->playerSP = playerSP;
 }
@@ -210,3 +263,21 @@ void Boss::requestPlayerSide(const short playerSide) {
 void Boss::requestPlayerScale(const sf::Vector2f& playerScale) {
 	this->playerScale = playerScale;
 }
+
+short Boss::updateDeltaHealthPlayer() {
+	short tempDeltaHealthPlayer = deltaHealthPlayer;
+	deltaHealthPlayer = 0;
+	return tempDeltaHealthPlayer;
+}
+
+short Boss::updateEnergyPlayer() {
+	short tempEnergyRegen = energyRegen;
+	energyRegen = 0;
+	return tempEnergyRegen;
+}
+
+void Boss::requestIsPlayerDied(const bool isPlayerDied) {
+	this->isPlayerDied = isPlayerDied;
+}
+
+
