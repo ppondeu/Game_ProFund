@@ -116,6 +116,7 @@ int main(){
 				gui->requestScore(beta->updateScore());
 
 				golaMoska->itemAffect(tempItemSelected);
+				gui->requestScore(golaMoska->updateScore());
 				
 				
 			}
@@ -346,4 +347,3 @@ int main(){
 	return 0;
 
 }
-
