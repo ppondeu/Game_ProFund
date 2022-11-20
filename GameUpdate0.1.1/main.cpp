@@ -1,0 +1,202 @@
+#include<SFML/Graphics.hpp>
+#include<SFML/Audio.hpp>
+#include<iostream>
+#include"MainMenu.h"
+#include"GamePlay.h"
+#include"Tutorials.h"
+#include"LeaderBoard.h"
+#include"PauseMenu.h"
+#include"EnterName.h"
+
+#define MAINMENU_S 0
+#define TUTORIALS_S 1
+#define LEADERBOARD_S 2
+#define GAMEPLAY_S 3
+#define PAUSED_S 4
+#define GAMEOVER_S 5
+
+int main() {
+
+	sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "GAME", sf::Style::Close | sf::Style::Titlebar);
+	window.setFramerateLimit(60);
+	sf::Vector2f mousePos;
+
+	MainMenu * mainMenu = new MainMenu;
+	GamePlay* gameplay = new GamePlay;
+	Tutorials* tutorials = new Tutorials;
+	LeaderBoard* leaderBoard = new LeaderBoard;
+	PauseMenu* gamePause = new PauseMenu;
+	EnterName* enterName = new EnterName;
+
+	short state = GAMEOVER_S;
+	short cntPressedEscape = 0;
+	short cntPressedL = 0;
+	short cntPressedR = 0;
+	short lastState = state;
+	while (window.isOpen()) {
+		
+		//std::cout <<mousePos.y << std::endl;
+		sf::Event event;
+		while (window.pollEvent(event)) {
+			if (event.type == sf::Event::Closed) window.close();
+			if (event.type == sf::Event::KeyPressed) {
+				if (event.key.code == sf::Keyboard::Escape) {
+					if (state == GAMEPLAY_S) {
+						++cntPressedEscape;
+						if (cntPressedEscape == 1) {
+							lastState = state;
+							state = PAUSED_S;
+						}
+					}
+					
+				}
+			}
+			if (event.type == sf::Event::KeyReleased) {
+				if (event.key.code == sf::Keyboard::Escape) {
+					cntPressedEscape = 0;
+				}
+
+			}
+			if (event.type == sf::Event::MouseMoved) {
+				mousePos.x = event.mouseMove.x;
+				mousePos.y = event.mouseMove.y;
+			}
+			if (event.type == sf::Event::MouseButtonPressed)
+				if(event.key.code == sf::Mouse::Left){
+					if (state == MAINMENU_S) {
+						if (mainMenu->play.getFillColor() == sf::Color::Yellow) {
+							state = GAMEPLAY_S;
+							cntPressedL = 0;
+							delete mainMenu;
+							mainMenu = new MainMenu;
+							mousePos = { 0.0f, 0.0f };
+						}
+						else if (mainMenu->exit.getFillColor() == sf::Color::Yellow) {
+							window.close();
+						}
+						else if (mainMenu->tutorials.getFillColor() == sf::Color::Yellow) {
+							state = TUTORIALS_S; 
+							delete mainMenu;
+							mainMenu = new MainMenu;
+							mousePos = { 0.0f, 0.0f };
+						}
+						else if (mainMenu->leaderboard.getFillColor() == sf::Color::Yellow) {
+							lastState = state;
+							state = LEADERBOARD_S;
+							leaderBoard->lastState = lastState;
+							mousePos = { 0.0f, 0.0f };
+						}
+					}
+					else if (state == TUTORIALS_S) {
+						if (tutorials->backTxt.getFillColor() == sf::Color::Yellow) {
+							state = MAINMENU_S;
+							mousePos = { 0.0f, 0.0f };
+						}
+					}
+					else if (state == LEADERBOARD_S) {
+						if (leaderBoard->menuTxt.getFillColor() == sf::Color::Red) {
+							lastState = state;
+							state = MAINMENU_S;
+							delete leaderBoard;
+							leaderBoard = new LeaderBoard;
+							leaderBoard->lastState = lastState;
+						}
+						else if (leaderBoard->playAgainTxt.getFillColor() == sf::Color::Red && lastState == GAMEPLAY_S) {
+							lastState = state;
+							state = GAMEPLAY_S;
+							delete leaderBoard;
+							leaderBoard = new LeaderBoard;
+							leaderBoard->lastState = lastState;
+						}
+						
+					}
+					else if (state == PAUSED_S) {
+						if (gamePause->resumeTxt.getFillColor() == sf::Color::Red) {
+							lastState = state;
+							state = GAMEPLAY_S;
+							mousePos = { 0.0f, 0.0f };
+						}
+						else if (gamePause->restartTxt.getFillColor() == sf::Color::Red) {
+							lastState = state;
+							state = GAMEPLAY_S;
+							delete gameplay;
+							gameplay = new GamePlay;
+							mousePos = { 0.0f, 0.0f };
+						}
+						else if (gamePause->homeTxt.getFillColor() == sf::Color::Red) {
+							lastState = state;
+							state = MAINMENU_S;
+							delete gameplay;
+							gameplay = new GamePlay;
+							mousePos = { 0.0f, 0.0f };
+						}
+					}
+					else if (state == GAMEOVER_S) {
+						if (enterName->submitTxt.getFillColor() == sf::Color::Yellow && enterName->textEnterStr != "") {
+							lastState = state;
+							// SAVE DATA TO FILE -> ordinal, score, name
+							state = LEADERBOARD_S;
+							delete enterName;
+							enterName = new EnterName;
+							mousePos = { 0.0f, 0.0f };
+						}
+					}
+			}
+
+			if (state == GAMEOVER_S) {
+				enterName->onEvent(event);
+			}
+		}
+
+		if (state == MAINMENU_S) {
+			mainMenu->onUpdate(mousePos);
+		}
+		else if (state == TUTORIALS_S) {
+			tutorials->onUpdate(mousePos);
+		}
+		else if (state == LEADERBOARD_S) {
+			leaderBoard->onUpdate(mousePos);
+		}
+		else if (state == PAUSED_S) {
+			gamePause->onUpdate(mousePos);
+		}
+		else if (state == GAMEOVER_S) {
+			enterName->onUpdate(mousePos);
+		}
+
+		if (state == MAINMENU_S || state == LEADERBOARD_S) window.clear(sf::Color::Black);
+		else if (state == GAMEPLAY_S) window.clear(sf::Color::Magenta);
+		else if (state == TUTORIALS_S) window.clear(sf::Color(160, 75, 200, 255));
+		else if (state == PAUSED_S) window.clear(sf::Color(0, 0, 0, 100));
+		else if (state == GAMEOVER_S) window.clear(sf::Color::Magenta);
+		else window.clear(sf::Color::Black);
+		if (state == MAINMENU_S) {
+			window.setMouseCursorVisible(1);
+			mainMenu->draw(window);
+		}
+		else if (state == GAMEPLAY_S) {
+			window.setMouseCursorVisible(0);
+			gameplay->draw(window);
+		}
+		else if (state == TUTORIALS_S) {
+			window.setMouseCursorVisible(1);
+			tutorials->draw(window);
+		}
+		else if (state == LEADERBOARD_S) {
+			window.setMouseCursorVisible(1);
+			leaderBoard->draw(window);
+		}
+		else if (state == PAUSED_S) {
+			window.setMouseCursorVisible(1);
+			gamePause->draw(window);
+		}
+		else if (state == GAMEOVER_S) {
+			window.setMouseCursorVisible(1);
+			enterName->draw(window);
+		}
+
+		window.display();
+	}
+
+	return 0;
+}
